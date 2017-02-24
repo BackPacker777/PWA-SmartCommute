@@ -1,0 +1,4 @@
+(load => {
+    const APP = require('../app3.js');
+    new APP();
+})();
