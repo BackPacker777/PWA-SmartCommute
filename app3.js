@@ -41,7 +41,7 @@ class app3 {
 
                // -- ROUTES -- //
 
-               if (request.method == 'POST') {
+               if (request.method === 'POST') {
                     if (request.headers['x-requested-with'] === 'XMLHttpRequest0') {
                          this.loadData(request, response, 0);
                     } else if (request.headers['x-requested-with'] === 'XMLHttpRequest1') {
@@ -78,6 +78,7 @@ class app3 {
           if (whichAjax === 0) {
                let user = {};
                req.on('data', (data) => {
+                    data = JSON.parse(data);
                     let found = false;
                     let users = DATA_HANDLER.loadUserData('data/users.csv');
                     const COLUMNS = 4;
@@ -87,22 +88,16 @@ class app3 {
                          finalData[i] = tempArray[i].split(/,/).slice(0, COLUMNS);
                     }
                     for (let i = 0; i < finalData.length; i++) {
-                         if (data == finalData[i][0]) {
+                         if (data[0] == finalData[i][0] && data[1] == finalData[i][1]) {
                               found = true;
-                              DATA_HANDLER.findRecords(finalData[i][0], (data2) => {
-                                   if (data2 !== false) {
-                                        user = data2;
-                                   } else {
-                                        user = {
-                                             'email': finalData[i][0],
-                                             'lastName': finalData[i][1],
-                                             'firstName': finalData[i][2]
-                                        };
-                                   }
-                                   user = JSON.stringify(user);
-                                   res.writeHead(200, {'content-type': 'application/json'});
-                                   res.end(user);
+                              user = JSON.stringify({
+                                   'email': finalData[i][0],
+                                   'password': finalData[i][1],
+                                   'lastName': finalData[i][2],
+                                   'firstName': finalData[i][3]
                               });
+                              res.writeHead(200, {'content-type': 'application/json'});
+                              res.end(user);
                               break;
                          }
                     }
@@ -119,7 +114,7 @@ class app3 {
                }).on('error', (err) => {
                     next(err);
                }).on('end', () => {
-                    DATA_HANDLER.queryData(formData);
+                    // DATA_HANDLER.queryData(formData);
                     formData = JSON.stringify(formData);
                     res.writeHead(200, {'content-type': 'application/json'});
                     res.end(formData);

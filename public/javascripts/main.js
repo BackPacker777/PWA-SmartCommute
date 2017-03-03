@@ -20,6 +20,7 @@ class EventHandler {
           this.handleFB();
           this.handleContinue();
           this.handleCreate();
+          this.handleSubmit();
      }
 
      handleFB() {
@@ -34,40 +35,22 @@ class EventHandler {
                if (document.getElementById('email').value === '' || ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(document.getElementById('email').value)) {
                     EventHandler.alertId();
                } else {
-                    this.performAjax('XMLHttpRequest0', document.getElementById('email').value, (response) => {
+                    this.performAjax('XMLHttpRequest0', [document.getElementById('email').value, document.getElementById('password').value], (response) => {
                          if (response === 'false') {
                               EventHandler.alertId();
                          } else {
-                              console.log('\nYAY!');
                               this.user = JSON.parse(response);
                               document.getElementById('login').style.display = 'none';
                               document.getElementById('log').style.display = 'block';
-                              if (Object.prototype.toString.call(this.user) === '[object Array]') {
-                                   document.getElementById('name').innerHTML = `${this.user[0].firstName} ${this.user[0].lastName}`;
-                              } else {
+                              console.log(this.user.firstName);
+                              if (Object.prototype.toString.call(this.user) === '[object Object]') {
                                    document.getElementById('name').innerHTML = `${this.user.firstName} ${this.user.lastName}`;
-                              }
-                         }
-                    });
-               } /*else {
-                              this.user = JSON.parse(response);
-                              document.getElementById('top').style.display = 'none';
-                              document.getElementById('logEntry').style.display = 'block';
-                              if (Object.prototype.toString.call(this.coach) === '[object Array]') {
-                                   document.getElementById('coachName').innerHTML = `${this.coach[0].firstName} ${this.coach[0].lastName}`;
-                                   document.getElementById('coachID').value = this.coach[0].coachID;
-                                   document.getElementById('lastName').value = this.coach[0].lastName;
-                                   document.getElementById('firstName').value = this.coach[0].firstName;
-                                   this.updateEvents();
                               } else {
-                                   document.getElementById('coachName').innerHTML = `${this.coach.firstName} ${this.coach.lastName}`;
-                                   document.getElementById('coachID').value = this.coach.coachID;
-                                   document.getElementById('lastName').value = this.coach.lastName;
-                                   document.getElementById('firstName').value = this.coach.firstName;
+                                   document.getElementById('name').innerHTML = `${this.user[0].firstName} ${this.user[0].lastName}`;
                               }
                          }
                     });
-               }*/
+               }
           });
      }
 
@@ -79,50 +62,26 @@ class EventHandler {
      }
 
      handleSubmit() {
-          document.getElementById('coachingData').addEventListener('submit', (event) => {
-               event.preventDefault();
-               if (document.getElementById('eventDate').validity.valid && document.getElementById('eventName').validity.valid) {
-                    let fieldValues = [];
-                    fieldValues[0] = document.getElementById('eventDate').value;
-                    fieldValues[1] = document.getElementById('eventNumber').value;
-                    fieldValues[2] = document.getElementById('eventName').value;
-                    if (this.validate(fieldValues) === true) {
-                         let data = new FormData(document.querySelector('#coachingData'));
+          document.getElementById('submit').addEventListener('click', () => {
+               if (document.getElementById('createEmail').value !== 'undefined' && /^[a-z0-9]{1,20}$/i.test(document.getElementById('createPassword').value)) {
+                    if (document.getElementById('createPassword').value === document.getElementById('confirmPassword').value) {
+                         let data = new FormData(document.querySelector('#createAccount'));
                          this.performAjax('XMLHttpRequest1', data, (response) => {
-                              this.coach = JSON.parse(response);
-                              this.updateEvents();
+                              let meow = JSON.parse(response);
+                              console.log(meow);
+                              // this.updateEvents();
                          });
-                         document.getElementById('eventDate').value = null;
-                         document.getElementById('eventNumber').value = null;
-                         document.getElementById('eventName').value = null;
+                    } else {
+                         alert(`Passwords don't match, please try again.`);
                     }
+               } else {
+                    alert(`Please fill in all data.`);
                }
           });
      }
 
      static alertId() {
           alert('You must provide your proper email address to continue.');
-     }
-
-     validate(data) {
-          let validated = true;
-          data[1] = 1;
-          for (let i = 0; i < data.length; i++) {
-               if (typeof data[i] === 'string') {
-                    if (data[i] === '') {
-                         alert(`Incorrect data entered. ${data[i]}`);
-                         validated = false;
-                         break;
-                    }
-               } else {
-                    if (!/^\d{1,20}$/.test(data[i])) {
-                         alert(`Incorrect data entered.`);
-                         validated = false;
-                         break;
-                    }
-               }
-          }
-          return validated;
      }
 
      performAjax(requestNum, sendToNode, callback) {
