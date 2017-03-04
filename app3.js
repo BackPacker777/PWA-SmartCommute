@@ -76,32 +76,13 @@ class app3 {
 
      loadData(req, res, whichAjax) {
           if (whichAjax === 0) {
-               let user = {};
                req.on('data', (data) => {
-                    data = JSON.parse(data);
-                    let found = false;
-                    let users = DATA_HANDLER.loadUserData('data/users.csv');
-                    const COLUMNS = 4;
-                    let tempArray, finalData = [];
-                    tempArray = users.split(/\r?\n/); //remove newlines
-                    for (let i = 0; i < tempArray.length; i++) {
-                         finalData[i] = tempArray[i].split(/,/).slice(0, COLUMNS);
-                    }
-                    for (let i = 0; i < finalData.length; i++) {
-                         if (data[0] == finalData[i][0] && data[1] == finalData[i][1]) {
-                              found = true;
-                              user = JSON.stringify({
-                                   'email': finalData[i][0],
-                                   'password': finalData[i][1],
-                                   'lastName': finalData[i][2],
-                                   'firstName': finalData[i][3]
-                              });
-                              res.writeHead(200, {'content-type': 'application/json'});
-                              res.end(user);
-                              break;
-                         }
-                    }
-                    if (found === false) {
+                    let cleanData = data.toString('utf8');
+                    let user = DATA_HANDLER.handleUserData(cleanData, whichAjax);
+                    if (user !== 'false') {
+                         res.writeHead(200, {'content-type': 'application/json'});
+                         res.end(user);
+                    } else {
                          res.writeHead(200, {'content-type': 'text/plain'});
                          res.end('false');
                     }
@@ -114,8 +95,8 @@ class app3 {
                }).on('error', (err) => {
                     next(err);
                }).on('end', () => {
-                    // DATA_HANDLER.queryData(formData);
                     formData = JSON.stringify(formData);
+                    DATA_HANDLER.handleUserData(formData, whichAjax);
                     res.writeHead(200, {'content-type': 'application/json'});
                     res.end(formData);
                });
