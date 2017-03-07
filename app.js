@@ -1,108 +1,90 @@
-//  todo:
+//  todo: Add Oauth2 support; Add forgot password support
 
 "use strict";
 
-const DATA_HANDLER = require('./node/DataHandler'),
-     QS = require('querystring'),
-     EJS = require('ejs');
+const DATA_HANDLER = require('./node/DataHandler');
 
-class app {
+class app3 {
      constructor() {
-          this.DataHandler = new DATA_HANDLER();
+          this.dataHandler = new DATA_HANDLER();
           this.ejsData = null;
-          this.certData = DATA_HANDLER.loadCerts();
           this.loadServer();
      }
 
      loadServer() {
-          // const HTTPS = require('https'),
           const HTTP = require('http'),
-               EJS = require('ejs'),
-               PORT = process.env.PORT || 8443,
-               // SERVER = HTTPS.createServer(this.certData, (req, res) => {
-               SERVER = HTTP.createServer((req, res) => {
-                    let httpHandler = (err, str, contentType) => {  //http://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname
-                         if (err) {
-                              res.writeHead(500, { 'Content-Type': 'text/plain' });
-                              res.end('An error has occurred: ' + err.message);
-                         } else if (contentType.indexOf('image') >= 0) {
-                              res.writeHead(200, {'Content-Type': contentType});
-                              res.end(str, 'binary');
-                         } else if (contentType.indexOf('html') >= 0) {
-                              res.writeHead(200, { 'Content-Type': contentType });
-                              res.end(EJS.render(str, {
-                                   data: this.ejsData,
-                                   filename: 'index.ejs' }));
-                         } else {
-                              res.writeHead(200, { 'Content-Type': contentType });
-                              res.end(str, 'utf-8');
-                         }
-                    };
+               PORT = process.env.PORT || 8000,
+               EJS = require('ejs');
 
-                    if (req.method == 'POST') {
-                         if (req.headers['x-requested-with'] === 'XMLHttpRequest0') {
-                              this.loadData(req, res, 0);
-                         } else if (req.headers['x-requested-with'] === 'XMLHttpRequest1') {
-                              this.loadData(req, res, 1);
-                         } else {
-                              console.log("[405] " + req.method + " to " + req.url);
-                              res.writeHead(405, "Method not supported", { 'Content-Type': 'text/html' });
-                              res.end('<html><head><title>405 - Method not supported</title></head><body><h1>Method not supported.</h1></body></html>');
-                         }
-                    } else if (req.url.indexOf('/javascripts/') >= 0) {
-                         this.render(req.url.slice(1), 'application/ecmascript', httpHandler, 'utf-8');
-                    } else if (req.url.indexOf('/css/') >= 0) {
-                         this.render(req.url.slice(1), 'text/css', httpHandler, 'utf-8');
-                    } else if (req.url.indexOf('/images/') >= 0) {
-                         this.render(req.url.slice(1), 'image/png', httpHandler, 'binary');
-                    } else if (req.url.indexOf('/results.ejs') >= 0) {
-                         this.render('public/views/results.ejs', 'text/html', httpHandler, 'utf-8');
+          HTTP.createServer((request, response) => {
+
+               // -- DOM RESPONDER -- //
+
+               let httpHandler = (error, string, contentType) => {
+                    if (error) {
+                         response.writeHead(500, {'Content-Type': 'text/plain'});
+                         response.end('An error has occurred: ' + error.message);
+                    } else if (contentType.indexOf('image') >= 0) {
+                         response.writeHead(200, {'Content-Type': contentType});
+                         response.end(string, 'binary');
+                    } else if (contentType.indexOf('html') >= 0) {
+                         response.writeHead(200, {'Content-Type': contentType});
+                         response.end(EJS.render(string, {
+                              data: this.ejsData,
+                              filename: 'index.ejs'
+                         }));
                     } else {
-                         this.render('public/views/index.ejs', 'text/html', httpHandler, 'utf-8');
+                         response.writeHead(200, {'Content-Type': contentType});
+                         response.end(string, 'utf-8');
                     }
-               }).listen(PORT, _ => console.log('-= App Listening at Port:' + PORT + ' =-'));
+               };
+
+               // -- ROUTES -- //
+
+               if (request.method === 'POST') {
+                    if (request.headers['x-requested-with'] === 'XMLHttpRequest0') {
+                         this.loadData(request, response, 0);
+                    } else if (request.headers['x-requested-with'] === 'XMLHttpRequest1') {
+                         this.loadData(request, response, 1);
+                    } else if (request.headers['x-requested-with'] === 'XMLHttpRequest2') {
+                         this.loadData(request, response, 2);
+                    } else {
+                         console.log("[405] " + request.method + " to " + request.url);
+                         response.writeHead(405, "Method not supported", { 'Content-Type': 'text/html' });
+                         response.end('<html><head><title>405 - Method not supported</title></head><body><h1>Method not supported.</h1></body></html>');
+                    }
+               } else if (request.url.indexOf('.js') >= 0) {
+                    this.render(request.url.slice(1), 'application/javascript', httpHandler, 'utf-8');
+               } else if (request.url.indexOf('.css') >= 0) {
+                    this.render(request.url.slice(1), 'text/css', httpHandler, 'utf-8');
+               } else if (request.url.indexOf('.png') >= 0) {
+                    this.render(request.url.slice(1), 'image/png', httpHandler, 'binary');
+               } else if (request.url.indexOf('/') >= 0) {
+                    this.render('public/views/index.ejs', 'text/html', httpHandler, 'utf-8');
+               } else {
+                    this.render(`HEY! What you're looking for: it's not here!`, 'text/html', httpHandler, 'utf-8');
+               }
+          }).listen(PORT, () => {
+               console.log('-= App Listening at 127.0.0.1:' + PORT + ' =-');
+          });
      }
 
      render(path, contentType, callback, encoding) {
           const FS = require('fs');
-          FS.readFile(__dirname + '/' + path, encoding ? encoding : 'utf-8', (err, str) => { // ternary
-               callback(err, str, contentType);  // http://stackoverflow.com/questions/8131344/what-is-the-difference-between-dirname-and-in-node-js
+          FS.readFile(path, encoding ? encoding : 'utf-8', (error, string) => { // ternary
+               callback(error, string, contentType);
           });
      }
 
      loadData(req, res, whichAjax) {
           if (whichAjax === 0) {
-               let coach = {};
                req.on('data', (data) => {
-                    let found = false;
-                    let coaches = DATA_HANDLER.loadCoachData('data/coaches.csv');
-                    const COLUMNS = 3;
-                    let tempArray, finalData = [];
-                    tempArray = coaches.split(/\r?\n/); //remove newlines
-                    for (let i = 0; i < tempArray.length; i++) {
-                         finalData[i] = tempArray[i].split(/,/).slice(0, COLUMNS);
-                    }
-                    for (let i = 0; i < finalData.length; i++) {
-                         if (data == finalData[i][0]) {
-                              found = true;
-                              DATA_HANDLER.findRecords(finalData[i][0], (data2) => {
-                                   if (data2 !== false) {
-                                        coach = data2;
-                                   } else {
-                                        coach = {
-                                             'coachID': finalData[i][0],
-                                             'lastName': finalData[i][1],
-                                             'firstName': finalData[i][2]
-                                        };
-                                   }
-                                   coach = JSON.stringify(coach);
-                                   res.writeHead(200, {'content-type': 'application/json'});
-                                   res.end(coach);
-                              });
-                              break;
-                         }
-                    }
-                    if (found === false) {
+                    let cleanData = data.toString('utf8');
+                    let user = DATA_HANDLER.handleUserData(cleanData, whichAjax);
+                    if (user !== 'false') {
+                         res.writeHead(200, {'content-type': 'application/json'});
+                         res.end(user);
+                    } else {
                          res.writeHead(200, {'content-type': 'text/plain'});
                          res.end('false');
                     }
@@ -115,19 +97,33 @@ class app {
                }).on('error', (err) => {
                     next(err);
                }).on('end', () => {
-                    DATA_HANDLER.queryData(formData);
                     formData = JSON.stringify(formData);
+                    DATA_HANDLER.handleUserData(formData, whichAjax);
                     res.writeHead(200, {'content-type': 'application/json'});
+                    res.end(formData);
+               });
+          } else if (whichAjax === 2) {
+               const FORMIDABLE = require('formidable');  // https://docs.nodejitsu.com/articles/HTTP/servers/how-to-handle-multipart-form-data
+               let formData = {};
+               new FORMIDABLE.IncomingForm().parse(req).on('field', (field, name) => {
+                    formData[field] = name;
+               }).on('error', (err) => {
+                    next(err);
+               }).on('end', () => {
+                    // DATA_HANDLER.queryData(formData);
+                    this.dataHandler.addData(formData);
+                    res.writeHead(200, {'content-type': 'application/json'});
+                    formData = JSON.stringify(formData);
                     res.end(formData);
                });
           }
      }
-
-     setEjsData() {
-          new DATA_HANDLER().loadData((docs) => {
-               this.ejsData = docs;
-          });
-     }
 }
 
-module.exports = app;
+module.exports = app3;
+
+
+// https://www.npmjs.com/package/ejs
+// http://ejs.co
+// http://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname
+// http://stackoverflow.com/questions/8131344/what-is-the-difference-between-dirname-and-in-node-js
