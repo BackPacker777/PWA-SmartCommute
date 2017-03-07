@@ -1,10 +1,10 @@
-# PWA-Template 2017
+# Emmet County Smart Commute App
 
 ## Progressive Web Application
-### Vanilla ES6/Node, EJS
+### Vanilla ES6/Node, EJS, NeDB
 ---
 **Author:**  hbates@northmen.org
 
 **Version:**  0.0.1
 
-**Purpose:**  Put purpose here
+**Purpose:**  For users to log trip data

@@ -5,10 +5,14 @@
 const CACHE_NAME = "1.00";
 let cacheFiles = [
      '/public/views/index.ejs',
-	 '/public/views/header.ejs',
-	 '/public/views/footer.ejs',
-     '/public/css/foundation63.min.css',
-     '/public/css/override.css',
+	'/public/views/header.ejs',
+	'/public/views/footer.ejs',
+     '/public/views/create.ejs',
+     '/public/views/log.ejs',
+     '/public/views/result.ejs',
+     '/public/css/normalize.css',
+     '/public/css/skeleton.css',
+     '/public/css/overrides.css',
      '/public/javascripts/main.js',
      '/public/favicons/favicon.ico',
      '/public/favicons/android-chrome-192x192.png'

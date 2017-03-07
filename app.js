@@ -17,6 +17,7 @@ class app3 {
                EJS = require('ejs');
 
           HTTP.createServer((request, response) => {
+               console.log(request);
 
                // -- DOM RESPONDER -- //
 

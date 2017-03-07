@@ -4,9 +4,16 @@
 
 class main {
      constructor() {
+          main.loadServiceWorker();
           main.prepApp();
           new EventHandler();
           this.user = [];
+     }
+
+     static loadServiceWorker() {
+          if ('serviceWorker' in navigator) {
+               navigator.serviceWorker.register('/ServiceWorker.js');
+          }
      }
 
      static prepApp() {
