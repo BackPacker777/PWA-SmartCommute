@@ -24,23 +24,23 @@
         <div class="row">
             <div class="four columns offset-by-four">
                 <label for="email">Your email:</label>
-                <input class="u-full-width" type="email" placeholder="username@mailserver.com" id="email">
+                <input class="u-full-width" type="email" placeholder="username@mailserver.com" name="getEmail" id="getEmail">
             </div>
         </div>
         <div class="row">
             <div class="four columns offset-by-four">
                 <label for="password">Password:</label>
-                <input class="u-full-width" type="password" placeholder="Password" id="password">
+                <input class="u-full-width" type="password" placeholder="Password" name="password" id="password">
             </div>
         </div>
         <div class="row text-center">
             <div class="four columns offset-by-four">
-                <input class="button-primary" type="button" value="Continue" id="continue">
+                <input class="button-primary" type="button" value="Continue" name="continue" id="continue">
             </div>
         </div>
         <div class="row text-center">
             <div class="four columns offset-by-four">
-                <input class="button" type="button" value="No account? Create!" id="creator">
+                <input class="button" type="button" value="No account? Create!" name="creator" id="creator">
             </div>
         </div>
     </form>
@@ -49,5 +49,7 @@
 <% include public/views/log.ejs %>
 
 <% include public/views/create.ejs %>
+
+<% include public/views/result.ejs %>
 
 <% include public/views/footer.ejs %>

@@ -12,6 +12,8 @@ class main {
      static prepApp() {
           document.getElementById('log').style.display = 'none';
           document.getElementById('create').style.display = 'none';
+          document.getElementById('result').style.display = 'none';
+          document.getElementById('login').style.display = 'block';
      }
 }
 
@@ -21,26 +23,32 @@ class EventHandler {
           this.handleContinue();
           this.handleCreate();
           this.handleSubmit();
+          this.handleEnterLog();
+          this.handleNewLog();
      }
 
      handleFB() {
           document.getElementById('fb').addEventListener('click', () => {
+               document.getElementById('create').style.display = 'none';
                document.getElementById('login').style.display = 'none';
+               document.getElementById('result').style.display = 'none';
                document.getElementById('log').style.display = 'block';
           });
      }
 
      handleContinue() {
           document.getElementById('continue').addEventListener('click', () => {
-               if (document.getElementById('email').value === '' || ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(document.getElementById('email').value)) {
+               if (document.getElementById('getEmail').value === '' || ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(document.getElementById('getEmail').value)) {
                     EventHandler.alertId();
                } else {
-                    this.performAjax('XMLHttpRequest0', JSON.stringify([document.getElementById('email').value, document.getElementById('password').value]), (response) => {
+                    this.performAjax('XMLHttpRequest0', JSON.stringify([document.getElementById('getEmail').value, document.getElementById('password').value]), (response) => {
                          if (response === 'false') {
-                              EventHandler.alertId();
+                              alert('You must provide your proper email address to continue.');
                          } else {
                               this.user = JSON.parse(response);
+                              document.getElementById('create').style.display = 'none';
                               document.getElementById('login').style.display = 'none';
+                              document.getElementById('result').style.display = 'none';
                               document.getElementById('log').style.display = 'block';
                               if (Object.prototype.toString.call(this.user) === '[object Object]') {
                                    document.getElementById('name').innerHTML = `${this.user.firstName} ${this.user.lastName}`;
@@ -56,6 +64,8 @@ class EventHandler {
      handleCreate() {
           document.getElementById('creator').addEventListener('click', () => {
                document.getElementById('login').style.display = 'none';
+               document.getElementById('result').style.display = 'none';
+               document.getElementById('log').style.display = 'none';
                document.getElementById('create').style.display = 'block';
           });
      }
@@ -73,6 +83,8 @@ class EventHandler {
                                    let data = new FormData(document.querySelector('#createAccount'));
                                    this.performAjax('XMLHttpRequest1', data, () => {
                                         alert(`Account created`);
+                                        document.getElementById('login').style.display = 'none';
+                                        document.getElementById('result').style.display = 'none';
                                         document.getElementById('create').style.display = 'none';
                                         document.getElementById('log').style.display = 'block';
                                    });
@@ -91,19 +103,42 @@ class EventHandler {
           });
      }
 
-     static alertId() {
-          alert('You must provide your proper email address to continue.');
+     handleEnterLog() {
+          document.getElementById('enterLog').addEventListener('click', () => {
+               let numTrips = Number(document.getElementById('tripNums').value);
+               let tripMiles = Number(document.getElementById('tripMileage').value);
+               if (numTrips > 0 && numTrips < 99 &&  tripMiles > 0 && tripMiles < 9999) {
+                    document.getElementById('log').style.display = 'none';
+                    document.getElementById('create').style.display = 'none';
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('result').style.display = 'block';
+                    let data = new FormData(document.querySelector('#logData'));
+                    data.append('email', this.user.email);
+                    this.performAjax('XMLHttpRequest2', data);
+               } else {
+                    alert(`Invalid trip data, please try again.`);
+               }
+          });
+     }
+
+     handleNewLog() {
+          document.getElementById('newLog').addEventListener('click', () => {
+               document.getElementById('logData').reset();
+               document.getElementById('login').style.display = 'none';
+               document.getElementById('result').style.display = 'none';
+               document.getElementById('create').style.display = 'none';
+               document.getElementById('log').style.display = 'block';
+          });
      }
 
      performAjax(requestNum, sendToNode, callback) {
           let bustCache = '?' + new Date().getTime();
           const XHR = new XMLHttpRequest();
-          // console.log(sendToNode);
           XHR.open('POST', document.url  + bustCache, true);
           XHR.setRequestHeader('X-Requested-with', requestNum);
           XHR.send(sendToNode);
           XHR.onload = () => {
-               if (XHR.readyState == 4 && XHR.status == 200) {
+               if (XHR.readyState == 4 && XHR.status == 200 && callback) {
                     return callback(XHR.responseText);
                }
           };
@@ -113,3 +148,11 @@ class EventHandler {
 window.addEventListener('load', () => {
      new main();
 });
+
+
+/*
+http://stackoverflow.com/a/17067016/466246 (for of JSON object)
+for (const ITEM of data.entries()) {
+     console.log(ITEM);
+}
+*/

@@ -4,7 +4,7 @@
 
 const FS = require ('fs'),
      DATASTORE = require('nedb'),
-     DB = new DATASTORE({ filename: './data/log_db.json', autoload: true });
+     DB = new DATASTORE({ filename: 'data/log_db.json', autoload: true });
 
 class DataHandler {
 	constructor() {
@@ -26,7 +26,6 @@ class DataHandler {
                for (let i = 0; i < finalData.length; i++) {
                     console.log(`${data.createEmail} :: ${finalData[i][0]}`);
                     if (data.createEmail === finalData[i][0]) {
-                         console.log(`returning error: user exists`);
                          user = 'false';
                          break;
                     }
@@ -37,7 +36,6 @@ class DataHandler {
                     FS.appendFileSync(FILE_PATH, `${data.createLastName},`, 'utf8');
                     FS.appendFileSync(FILE_PATH, data.createFirstName, 'utf8');
                     FS.appendFileSync(FILE_PATH, '\n', 'utf8');
-                    console.log(`returning created`);
                     user = 'created'
                }
           } else {
@@ -49,7 +47,6 @@ class DataHandler {
                               'lastName': finalData[i][2],
                               'firstName': finalData[i][3]
                          });
-                         console.log(`returning existing user`);
                          break;
                     } else {
                          user = 'false';
@@ -59,40 +56,8 @@ class DataHandler {
           return user;
      }
 
-     static findRecords(user, callback) {
-          DB.find({ userID: user }, (err, docs) => {
-               if (docs.length > 0) {
-                    callback(docs);
-               } else {
-                    callback(false);
-               }
-          });
-     }
-
-     static updateData(data) {
-          DB.update({ _id: data.id }, {
-                 userID: data.userID
-               , lastName: data.lastName
-               , firstName: data.firstName
-               , eventDate: data.eventDate
-               , miles: data.miles
-          }, { upsert: true,
-               returnUpdatedDocs: true });
-     }
-
-     static addData(data) {
-          delete data.id;  // remove id field out of JSON parameter
+     addData(data) {
           DB.insert(data);
-     }
-
-     static queryData(data) {
-          DB.findOne({ _id: data.id }, (err, docs) => {
-               if (docs == null) {
-                    DataHandler.addData(data);
-               } else {
-                    DataHandler.updateData(data);
-               }
-          });
      }
 }
 

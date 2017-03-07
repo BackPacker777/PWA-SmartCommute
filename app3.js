@@ -1,4 +1,4 @@
-//  todo:
+//  todo: Add Oauth2 support; Add forgot password support
 
 "use strict";
 
@@ -6,7 +6,7 @@ const DATA_HANDLER = require('./node/DataHandler');
 
 class app3 {
      constructor() {
-          this.DataHandler = new DATA_HANDLER();
+          this.dataHandler = new DATA_HANDLER();
           this.ejsData = null;
           this.loadServer();
      }
@@ -46,6 +46,8 @@ class app3 {
                          this.loadData(request, response, 0);
                     } else if (request.headers['x-requested-with'] === 'XMLHttpRequest1') {
                          this.loadData(request, response, 1);
+                    } else if (request.headers['x-requested-with'] === 'XMLHttpRequest2') {
+                         this.loadData(request, response, 2);
                     } else {
                          console.log("[405] " + request.method + " to " + request.url);
                          response.writeHead(405, "Method not supported", { 'Content-Type': 'text/html' });
@@ -98,6 +100,20 @@ class app3 {
                     formData = JSON.stringify(formData);
                     DATA_HANDLER.handleUserData(formData, whichAjax);
                     res.writeHead(200, {'content-type': 'application/json'});
+                    res.end(formData);
+               });
+          } else if (whichAjax === 2) {
+               const FORMIDABLE = require('formidable');  // https://docs.nodejitsu.com/articles/HTTP/servers/how-to-handle-multipart-form-data
+               let formData = {};
+               new FORMIDABLE.IncomingForm().parse(req).on('field', (field, name) => {
+                    formData[field] = name;
+               }).on('error', (err) => {
+                    next(err);
+               }).on('end', () => {
+                    // DATA_HANDLER.queryData(formData);
+                    this.dataHandler.addData(formData);
+                    res.writeHead(200, {'content-type': 'application/json'});
+                    formData = JSON.stringify(formData);
                     res.end(formData);
                });
           }
