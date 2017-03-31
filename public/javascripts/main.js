@@ -4,7 +4,7 @@
 
 class main {
      constructor() {
-          main.loadServiceWorker();
+          // main.loadServiceWorker();
           main.prepApp();
           new EventHandler();
           this.user = [];
@@ -46,7 +46,7 @@ class EventHandler {
      handleContinue() {
           document.getElementById('continue').addEventListener('click', () => {
                if (document.getElementById('getEmail').value === '' || ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(document.getElementById('getEmail').value)) {
-                    EventHandler.alertId();
+                    alert(`Incorrect email address. Please try again.`)
                } else {
                     this.performAjax('XMLHttpRequest0', JSON.stringify([document.getElementById('getEmail').value, document.getElementById('password').value]), (response) => {
                          if (response === 'false') {
@@ -88,12 +88,24 @@ class EventHandler {
                          if (/^[a-z0-9]{1,20}$/i.test(document.getElementById('createPassword').value) && document.getElementById('createPassword').value === document.getElementById('confirmPassword').value) {
                               if (/^[a-z]{1,30}$/i.test(document.getElementById('createFirstName').value) && /^[a-z]{1,30}$/i.test(document.getElementById('createLastName').value)) {
                                    let data = new FormData(document.querySelector('#createAccount'));
-                                   this.performAjax('XMLHttpRequest1', data, () => {
-                                        alert(`Account created`);
-                                        document.getElementById('login').style.display = 'none';
-                                        document.getElementById('result').style.display = 'none';
-                                        document.getElementById('create').style.display = 'none';
-                                        document.getElementById('log').style.display = 'block';
+                                   this.performAjax('XMLHttpRequest1', data, (responseText) => {
+                                        document.getElementById('createAccount').reset();
+                                        if (responseText !== 'false') {
+                                             alert(`Account created`);
+                                             this.user = JSON.parse(responseText);
+                                             console.log(responseText);
+                                             document.getElementById('name').innerHTML = `${this.user.firstName} ${this.user.lastName}`;
+                                             document.getElementById('login').style.display = 'none';
+                                             document.getElementById('result').style.display = 'none';
+                                             document.getElementById('create').style.display = 'none';
+                                             document.getElementById('log').style.display = 'block';
+                                        } else {
+                                             alert(`Account already exists`);
+                                             document.getElementById('login').style.display = 'block';
+                                             document.getElementById('result').style.display = 'none';
+                                             document.getElementById('create').style.display = 'none';
+                                             document.getElementById('log').style.display = 'none';
+                                        }
                                    });
                               } else {
                                    alert(`Invalid name data, please try again.`);
@@ -158,8 +170,8 @@ window.addEventListener('load', () => {
 
 
 /*
-http://stackoverflow.com/a/17067016/466246 (for of JSON object)
-for (const ITEM of data.entries()) {
-     console.log(ITEM);
-}
-*/
+ http://stackoverflow.com/a/17067016/466246 (for of JSON object)
+ for (const ITEM of data.entries()) {
+ console.log(ITEM);
+ }
+ */
