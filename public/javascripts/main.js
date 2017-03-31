@@ -4,7 +4,7 @@
 
 class main {
      constructor() {
-          // main.loadServiceWorker();
+          main.loadServiceWorker();
           main.prepApp();
           new EventHandler();
           this.user = [];
