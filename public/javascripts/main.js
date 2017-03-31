@@ -35,6 +35,21 @@ class EventHandler {
      }
 
      handleFB() {
+          window.fbAsyncInit = function() {
+               FB.init({
+                    appId      : '1365458466881593',
+                    xfbml      : true,
+                    version    : 'v2.8'
+               });
+               FB.AppEvents.logPageView();
+          };
+          (function(d, s, id){
+               var js, fjs = d.getElementsByTagName(s)[0];
+               if (d.getElementById(id)) {return;}
+               js = d.createElement(s); js.id = id;
+               js.src = "//connect.facebook.net/en_US/sdk.js";
+               fjs.parentNode.insertBefore(js, fjs);
+          }(document, 'script', 'facebook-jssdk'));
           document.getElementById('fb').addEventListener('click', () => {
                document.getElementById('create').style.display = 'none';
                document.getElementById('login').style.display = 'none';
@@ -93,7 +108,6 @@ class EventHandler {
                                         if (responseText !== 'false') {
                                              alert(`Account created`);
                                              this.user = JSON.parse(responseText);
-                                             console.log(responseText);
                                              document.getElementById('name').innerHTML = `${this.user.firstName} ${this.user.lastName}`;
                                              document.getElementById('login').style.display = 'none';
                                              document.getElementById('result').style.display = 'none';
